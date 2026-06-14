@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>島ガチャ — プレイ中</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+</head>
+<body>
+  <div class="container">
+
+    <!-- ヘッダー -->
+    <div class="game-header">
+      <span class="round-label" id="round-label">ラウンド 1 / 5</span>
+      <div class="possible-score" id="possible-score-area">
+        <span class="possible-label">獲得可能</span>
+        <span class="possible-value" id="possible-score">100</span>
+        <span class="possible-max">/ 100</span>
+      </div>
+      <span class="total-score" id="total-score">合計: 0</span>
+    </div>
+
+    <!-- 写真エリア -->
+    <div class="photo-area" id="photo-area">
+      <img id="island-photo" class="island-photo" src="" alt="この島はどこ？">
+      <div class="photo-nav" id="photo-nav">
+        <button class="photo-nav-btn" id="photo-prev" onclick="changePhoto(-1)">◀</button>
+        <span class="photo-counter" id="photo-counter">1 / 3</span>
+        <button class="photo-nav-btn" id="photo-next" onclick="changePhoto(1)">▶</button>
+      </div>
+      <div class="photo-placeholder" id="photo-placeholder">
+        <p>📷 写真を読み込み中...</p>
+      </div>
+    </div>
+
+    <!-- ヒントエリア -->
+    <div class="hint-area" id="hint-area">
+      <div class="hint-header">
+        <span class="hint-title">💡 ヒント</span>
+      </div>
+      <div class="hint-list" id="hint-list"></div>
+      <button class="btn btn-hint" id="hint-btn" onclick="revealHint()">
+        次のヒントを見る
+      </button>
+    </div>
+
+    <!-- 地図 -->
+    <div id="map" class="game-map"></div>
+
+    <!-- 回答ボタン -->
+    <button class="btn btn-primary btn-answer" id="answer-btn" onclick="submitAnswer()" disabled>
+      ここだ！
+    </button>
+
+    <!-- ラウンド結果 -->
+    <div class="result-overlay hidden" id="result-overlay">
+      <div class="result-card">
+        <h2 class="result-island-name" id="result-island-name"></h2>
+        <p class="result-prefecture" id="result-prefecture"></p>
+
+        <div class="result-scores">
+          <div class="result-score-item">
+            <span class="result-score-label">距離</span>
+            <span class="result-score-value" id="result-distance"></span>
+          </div>
+          <div class="result-score-item">
+            <span class="result-score-label">距離スコア</span>
+            <span class="result-score-value score-green" id="result-dist-score"></span>
+          </div>
+          <div class="result-score-item">
+            <span class="result-score-label">タイムボーナス</span>
+            <span class="result-score-value score-gold" id="result-time-bonus"></span>
+          </div>
+          <div class="result-score-item result-score-total">
+            <span class="result-score-label">ラウンド合計</span>
+            <span class="result-score-value" id="result-round-score"></span>
+          </div>
+        </div>
+
+        <!-- Wikipedia 情報 -->
+        <div class="wiki-info" id="wiki-info">
+          <p class="wiki-extract" id="wiki-extract"></p>
+          <a class="wiki-link" id="wiki-link" href="#" target="_blank" rel="noopener">
+            Wikipedia で詳しく見る →
+          </a>
+        </div>
+
+        <button class="btn btn-primary" id="next-btn" onclick="nextRound()">
+          次のラウンドへ →
+        </button>
+      </div>
+    </div>
+
+  </div>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="js/game.js"></script>
+</body>
+</html>

@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>島ガチャ — 結果</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div class="container">
+
+    <!-- スコア表示 -->
+    <div class="result-hero">
+      <p class="result-hero-label">ゲーム終了！</p>
+      <p class="result-hero-score" id="final-score">0</p>
+      <p class="result-hero-max">/ 500点</p>
+      <p class="result-hero-difficulty" id="final-difficulty"></p>
+    </div>
+
+    <!-- ラウンド振り返り -->
+    <div class="card">
+      <h2 class="card-title">ラウンド別</h2>
+      <div class="rounds-list" id="rounds-list"></div>
+    </div>
+
+    <!-- ランキング -->
+    <div class="card">
+      <h2 class="card-title">🏆 ランキング</h2>
+      <div class="ranking-list" id="ranking-list">
+        <p class="loading-text">読み込み中...</p>
+      </div>
+    </div>
+
+    <!-- ボタン -->
+    <div class="result-actions">
+      <button class="btn btn-primary" onclick="playAgain()">もう一度遊ぶ</button>
+      <button class="btn btn-secondary" onclick="goTop()">トップに戻る</button>
+    </div>
+
+  </div>
+
+  <script>
+    const API_BASE = "http://localhost:5000/api";
+
+    window.addEventListener("DOMContentLoaded", () => {
+      const stored = sessionStorage.getItem("gameResult");
+      if (!stored) {
+        window.location.href = "index.html";
+        return;
+      }
+
+      const result = JSON.parse(stored);
+      showResult(result);
+      fetchRanking(result.difficulty, result.session_id);
+    });
+
+
+    function showResult(result) {
+      // スコア
+      document.getElementById("final-score").textContent = result.total_score;
+
+      const diffLabels = { easy: "かんたん", normal: "ふつう", hard: "むずかしい" };
+      document.getElementById("final-difficulty").textContent =
+        `難易度: ${diffLabels[result.difficulty] || result.difficulty}`;
+
+      // ラウンド一覧
+      const list = document.getElementById("rounds-list");
+      list.innerHTML = "";
+
+      result.rounds.forEach((r) => {
+        const scoreClass = r.total_score >= 70 ? "score-green"
+                         : r.total_score >= 40 ? "score-gold"
+                         : "score-red";
+
+        const div = document.createElement("div");
+        div.className = "round-row";
+        div.innerHTML = `
+          <span class="round-number-label">R${r.round}</span>
+          <span class="round-island">${r.island_name}（${r.prefecture}）</span>
+          <span class="round-distance">${r.distance_km} km</span>
+          <span class="round-score ${scoreClass}">${r.total_score} pt</span>
+        `;
+        list.appendChild(div);
+      });
+    }
+
+
+    async function fetchRanking(difficulty, sessionId) {
+      try {
+        const res = await fetch(`${API_BASE}/ranking?difficulty=${difficulty || ""}`);
+        if (!res.ok) throw new Error("API error");
+        const data = await res.json();
+        showRanking(data, sessionId);
+      } catch (err) {
+        console.error("Ranking fetch failed:", err);
+        document.getElementById("ranking-list").innerHTML =
+          '<p class="loading-text">ランキングを取得できませんでした</p>';
+      }
+    }
+
+
+    function showRanking(entries, sessionId) {
+      const list = document.getElementById("ranking-list");
+      list.innerHTML = "";
+
+      if (entries.length === 0) {
+        list.innerHTML = '<p class="loading-text">まだランキングデータがありません</p>';
+        return;
+      }
+
+      entries.forEach((entry, i) => {
+        const rank = i + 1;
+        const isMe = false; // セッションIDでの判定は簡易版では省略
+
+        const div = document.createElement("div");
+        div.className = `ranking-row ${rank <= 3 ? "ranking-top" : ""} ${isMe ? "ranking-me" : ""}`;
+        div.innerHTML = `
+          <span class="ranking-rank">${rank}</span>
+          <span class="ranking-name">${entry.user_name}</span>
+          <span class="ranking-score">${entry.total_score} pt</span>
+        `;
+        list.appendChild(div);
+      });
+    }
+
+
+    function playAgain() {
+      sessionStorage.removeItem("gameResult");
+      window.location.href = "index.html";
+    }
+
+    function goTop() {
+      sessionStorage.removeItem("gameResult");
+      sessionStorage.removeItem("gameSession");
+      window.location.href = "index.html";
+    }
+  </script>
+</body>
+</html>

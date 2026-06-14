@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>島ガチャ — 西日本離島当てゲーム</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div class="container">
+
+    <!-- ヒーロー -->
+    <div class="hero">
+      <div class="hero-icon">🏝️</div>
+      <h1 class="hero-title">島ガチャ</h1>
+      <p class="hero-subtitle">西日本の離島、あなたはいくつわかる？</p>
+    </div>
+
+    <!-- フォーム -->
+    <div class="card">
+      <label class="label" for="username">ニックネーム</label>
+      <input
+        type="text"
+        id="username"
+        class="input"
+        placeholder="なまえを入力"
+        maxlength="20"
+        autocomplete="off"
+      >
+
+      <label class="label">難易度</label>
+      <div class="difficulty-group" id="difficulty-group">
+        <button class="difficulty-btn" data-value="easy">
+          <span class="difficulty-label">かんたん</span>
+          <span class="difficulty-desc">写真5枚 / ヒント3個 / 県レベル</span>
+        </button>
+        <button class="difficulty-btn active" data-value="normal">
+          <span class="difficulty-label">ふつう</span>
+          <span class="difficulty-desc">写真3枚 / ヒント2個 / 地方レベル</span>
+        </button>
+        <button class="difficulty-btn" data-value="hard">
+          <span class="difficulty-label">むずかしい</span>
+          <span class="difficulty-desc">写真1枚 / ヒント0個 / 西日本全体</span>
+        </button>
+      </div>
+
+      <button class="btn btn-primary" id="start-btn" onclick="startGame()">
+        ゲームスタート
+      </button>
+
+      <div class="text-center" style="margin-top: 12px;">
+        <a href="ranking.html" class="link">🏆 ランキングを見る</a>
+      </div>
+    </div>
+
+    <!-- ルール -->
+    <div class="card rules">
+      <h2 class="card-title">遊び方</h2>
+      <div class="rule-step">
+        <span class="rule-number">1</span>
+        <span>島の写真とヒントが表示されます</span>
+      </div>
+      <div class="rule-step">
+        <span class="rule-number">2</span>
+        <span>地図上で「ここだ！」と思う場所をクリック</span>
+      </div>
+      <div class="rule-step">
+        <span class="rule-number">3</span>
+        <span>正解との距離と回答スピードでスコアが決まります</span>
+      </div>
+      <div class="rule-step">
+        <span class="rule-number">4</span>
+        <span>5ラウンドで合計500点を目指そう！</span>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ----- API 設定 -----
+    const API_BASE = "http://localhost:5000/api";
+
+    // ----- 難易度選択 -----
+    let selectedDifficulty = "normal";
+
+    document.querySelectorAll(".difficulty-btn").forEach(btn => {
+      btn.addEventListener("click", () => {
+        document.querySelectorAll(".difficulty-btn").forEach(b => b.classList.remove("active"));
+        btn.classList.add("active");
+        selectedDifficulty = btn.dataset.value;
+      });
+    });
+
+    // ----- ゲーム開始 -----
+    async function startGame() {
+      const username = document.getElementById("username").value.trim() || "名無し";
+      const startBtn = document.getElementById("start-btn");
+
+      startBtn.disabled = true;
+      startBtn.textContent = "読み込み中...";
+
+      try {
+        const res = await fetch(`${API_BASE}/game/start`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            user_name: username,
+            difficulty: selectedDifficulty,
+          }),
+        });
+
+        if (!res.ok) throw new Error("API error");
+
+        const data = await res.json();
+
+        // セッション情報を保存して game.html へ遷移
+        sessionStorage.setItem("gameSession", JSON.stringify({
+          session_id: data.session_id,
+          islands: data.islands,
+          config: data.config,
+          user_name: username,
+        }));
+
+        window.location.href = "game.html";
+      } catch (err) {
+        alert("ゲーム開始に失敗しました。サーバーが起動しているか確認してください。");
+        console.error(err);
+        startBtn.disabled = false;
+        startBtn.textContent = "ゲームスタート";
+      }
+    }
+
+    // Enter キーでも開始
+    document.getElementById("username").addEventListener("keydown", (e) => {
+      if (e.key === "Enter") startGame();
+    });
+  </script>
+</body>
+</html>

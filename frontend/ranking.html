@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>島ガチャ — ランキング</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div class="container">
+
+    <div class="page-header">
+      <a href="index.html" class="back-link">← トップに戻る</a>
+      <h1 class="page-title">🏆 ランキング</h1>
+    </div>
+
+    <!-- 難易度フィルター -->
+    <div class="filter-group" id="filter-group">
+      <button class="filter-btn active" data-value="" onclick="filterRanking('')">すべて</button>
+      <button class="filter-btn" data-value="easy" onclick="filterRanking('easy')">かんたん</button>
+      <button class="filter-btn" data-value="normal" onclick="filterRanking('normal')">ふつう</button>
+      <button class="filter-btn" data-value="hard" onclick="filterRanking('hard')">むずかしい</button>
+    </div>
+
+    <!-- ランキング一覧 -->
+    <div class="card">
+      <div class="ranking-list" id="ranking-list">
+        <p class="loading-text">読み込み中...</p>
+      </div>
+    </div>
+
+    <div class="text-center" style="margin-top: 16px;">
+      <a href="index.html" class="btn btn-primary">遊んでみる</a>
+    </div>
+
+  </div>
+
+  <script src="js/ranking.js"></script>
+</body>
+</html>
